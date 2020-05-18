@@ -10,6 +10,28 @@
 
 ## 5 pavyzdinės Vector konteinerio funkcijos:
 
+### operator[]
+```shell
+	T &operator[](size_t i) { return first[i]; }
+    const T &operator[](size_t i) const { return first[i]; }
+```
+### reserve()
+```shell
+template <class T>
+void Vector<T>::reserve(size_t new_cap)
+{
+    if (new_cap > capacity())
+    {
+        iterator new_data = alloc.allocate(new_cap);
+        iterator new_avail = std::uninitialized_copy(first, avail, new_data);
+        uncreate();
+        first = new_data;
+        avail = new_avail;
+        limit = first + new_cap;
+    }
+}
+```
+
 ## Efektyvumo/spartos analizė: **std::vector vs Vector** naudojant push_back()
 
 | Dydis    | std::vector | Vector  |
