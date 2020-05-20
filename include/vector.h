@@ -1,5 +1,6 @@
 #include <memory>
 #include <vector>
+#include <iostream>
 
 template <class T>
 class Vector
@@ -12,11 +13,15 @@ public:
 
     // MEMBER FUNCTIONS (constructor, destructor,copy constructor, =, asign, get_allocator)
     Vector() { create(); }
-    explicit Vector(size_t n, const T &t = T{}) { create(n, t); }
+    explicit Vector(size_t n, const T &val = T{}) { create(n, val); }
+    //Vector(typename vector<T>::iterator first, typename vector<T>::iterator last);
+    Vector(std::initializer_list<T> lst) { create(lst); }
     Vector(const Vector &v) { create(v.begin(), v.end()); }
     Vector &operator=(const Vector &);
     ~Vector() { uncreate(); }
-    //asign nera
+    // void assign(size_type, const T &value);
+    // void assign(typename vector<T>::iterator, typename vector<T>::iterator);
+    // void assign(std::initializer_list<T>);
     std::allocator<T> get_allocator() const { return alloc; }
 
     // ELEMENT ACCESS (at, [], front, back, first )
@@ -28,34 +33,35 @@ public:
     const T &front() const { return *first; }
     T &back() { return *(avail - 1); }
     const T &back() const { return *(avail - 1); }
-    //first cia karoce kertasi su definitionu sadly
-    T& data() { return this->first; }
-	const T& data() const { return this->first; }
+    iterator data() { return first; }             //Pointer to the underlying element storage.
+    const iterator data() const { return first; } //Pointer to the underlying element storage.
 
     //ITERATORS (begin, end, rbegin, rend)
     iterator begin() { return first; }
-    const_iterator begin() const { return first; }
+    const_iterator cbegin() const { return first; }
     iterator end() { return avail; }
-    const_iterator end() const { return avail; }
-    iterator rbegin() { return limit - 1; }
-    const_iterator rbegin() const { return limit - 1; }
-    iterator rend() { return first + 1; }
-    const_iterator rend() const { return first + 1; }
+    const_iterator cend() const { return avail; }
+    //biski su sitais nijasna
+    iterator rbegin() { return avail - 1; }
+    const_iterator crbegin() const { return avail - 1; }
+    iterator rend() { return first; }
+    const_iterator crend() const { return first; }
 
     //CAPACITY (empty, size, max_size, reserve, capacity, shrink_to_fit)
     bool empty() const { return (first == NULL); }
     size_t size() const { return avail - first; }
     size_t max_size() const;
     void reserve(size_t new_cap);
-    size_t capacity() const { return limit - first; }
-    void shrink_to_fit(); 
+    size_t capacity() const { return limit - first; } //pas mane jis nedideja deja
+    void shrink_to_fit();
 
     //MODIFIERS (clear,insert, emplace, erase, push_back, emplace_back, pop_back, resize)
     void clear();
-    iterator insert( const_iterator pos, const T& value ); 
+    iterator insert(const_iterator pos, const T &value);
     //emplace
     void emplace_back(T args) { push_back(args); }
-    iterator erase(const_iterator pos);                       
+    iterator erase(const_iterator pos);
+    //iterator erase( const_iterator first, const_iterator last );
     void push_back(const T &t);
     void pop_back();
     void resize(size_t count, T value = T());
@@ -68,15 +74,16 @@ public:
     //erase_if
 
 private:
-    iterator first;
-    iterator avail;
-    iterator limit;
-    // atminties išskyrimo valdymui
+    iterator first; //pirmasis elementas
+    iterator avail; // pirmasis po paskutinio elemento
+    iterator limit; // capacity
+
     std::allocator<T> alloc; // objektas atminties valdymui
 
     void create();
     void create(size_t, const T &);
     void create(const_iterator, const_iterator);
+    void create(std::initializer_list<T>);
     void uncreate();
     void grow();
     void unchecked_append(const T &);
@@ -94,7 +101,37 @@ Vector<T> &Vector<T>::operator=(const Vector &rhs)
     }
     return *this;
 }
-//asign
+/*  template <class T>
+    void Vector<T>::assign(Vector<T>::size_type count, const T &value)
+    {
+        if (count > capacity())
+            grow_reallocate(count);
+        for (size_type i = 0; i < count; ++i)
+            buffer[i] = value;
+        vec_sz = count;
+    }
+
+    template <class T>
+    void vector<T>::assign(vector<T>::iterator first, vector<T>::iterator last)
+    {
+        size_type count = last - first;
+        if (count > cap_sz)
+            grow_reallocate(count);
+        for (size_type i = 0; i < count; ++i, ++first)
+            buffer[i] = *first;
+        vec_sz = count;
+    }
+
+    template <class T>
+    void vector<T>::assign(std::initializer_list<T> list)
+    {
+        size_type i, count = list.size();
+        if (count > cap_sz)
+            grow_reallocate(count);
+        i = 0;
+        for (auto &item : list)
+            buffer[i++] = item;
+    } */
 
 //CAPACITY
 template <class T>
@@ -143,36 +180,30 @@ void Vector<T>::clear()
     first = avail = new_data;
 }
 template <class T>
-typename Vector<T>::iterator Vector<T>::erase(const T* pos) {
-		T* it = &first[pos - first];
-        alloc.destroy(it);
-		//memmove(it, it + 1, (size() - (pos - elem) - 1) * sizeof(T));
-        std::uninitialized_move_n(it + 1, (size() - (pos - first) - 1) * sizeof(T), it);
-		resize((avail-first) - 1);
-		return it;
-	}
+typename Vector<T>::iterator Vector<T>::erase(const_iterator pos)
+{
+    iterator it = &first[pos - first];
+    std::cout << *(pos) << std::endl;
+    alloc.destroy(it);
+    std::uninitialized_move(it + 1, avail, it);
+    --avail;
+    return it;
+}
 
 template <typename T>
 typename Vector<T>::iterator Vector<T>::insert(Vector<T>::const_iterator pos, const T &val)
-{
-    auto it = &first[pos - first];
-    size_type cap_size = limit - first;
-    size_type vec_size = avail - first;
-    auto temp_first = first, avail_size = avail - first, limit_size = limit - first;
-    if(avail == limit)
-    {
-        auto temp_first = alloc.allocate(capacity() << 2);
-        std::uninitialized_copy(first, avail, temp_first);
-        alloc.deallocate(first, limit - first);
-        first = temp_first;
-        avail = first + avail_size;
-        limit = first + limit_size;
-    }
-    std::uninitialized_move_n(it, ((vec_size) - (pos - first)) * sizeof(T), it);
-    (*it) = val;
-    resize(avail_size + 1);
-    
-    return it;
+{    
+    if (avail == limit)
+        grow();
+
+    std::cout << *(pos) << std::endl;
+    //iterator it = &first[pos - first];
+    //avail++;
+    //std::cout << *(it) << std::endl;
+    //std::uninitialized_move(it, avail - 1 , it + 1 );
+    //*(it) = val;
+
+    //return it;
 }
 
 template <class T>
@@ -246,14 +277,14 @@ void Vector<T>::swap(Vector<T> &rhs)
 //NON-MEMBER FUNCTIONS (==, std::swap, erase, erase_if)
 template <class T>
 bool Vector<T>::operator==(const Vector &rhs)
-{   
+{
     size_t index = 0;
     auto pos = this->begin();
-    if ( rhs.size() == this->size() ) 
+    if (rhs.size() == this->size())
     {
-        for(auto element : rhs)
+        for (auto element : rhs)
         {
-            if(element != *pos++)
+            if (element != *pos++)
             {
                 return false;
             }
@@ -263,8 +294,8 @@ bool Vector<T>::operator==(const Vector &rhs)
     {
         return false;
     }
-    
-    return true;        
+
+    return true;
 }
 
 //---------------------------------------------------------------------
@@ -278,16 +309,25 @@ void Vector<T>::create()
 template <class T>
 void Vector<T>::create(size_t n, const T &val)
 {
-    first = alloc.allocate(n);             // grąžina ptr į array pirmą elementą
-    limit = avail = first + n;             // sustato rodykles į vietas
+    first = alloc.allocate(n);                  // grąžina ptr į array pirmą elementą
+    limit = avail = first + n;                  // sustato rodykles į vietas
     std::uninitialized_fill(first, limit, val); // inicializuoja elementus val reikšme
 }
 
 template <class T>
 void Vector<T>::create(const_iterator i, const_iterator j)
 {
-    first = alloc.allocate(j - i);                   // išskirti vietos j-i elementams
+    first = alloc.allocate(j - i);                        // išskirti vietos j-i elementams
     limit = avail = std::uninitialized_copy(i, j, first); // nukopijuoja elementus iš intervalo
+}
+
+template <typename T>
+void Vector<T>::create(std::initializer_list<T> list)
+{
+    first = avail = alloc.allocate(list.size());
+    limit = first + list.size();
+    for (auto &val : list)
+        unchecked_append(val);
 }
 
 template <class T>
@@ -309,19 +349,17 @@ void Vector<T>::uncreate()
 template <class T>
 void Vector<T>::grow()
 {
-    // dvigubai daugiau vietos, nei buvo
     size_t new_size = std::max(2 * (limit - first), ptrdiff_t(1));
-    // išskirti naują vietą ir perkopijuoti egzistuojančius elementus
     iterator new_data = alloc.allocate(new_size);
     iterator new_avail = std::uninitialized_copy(first, avail, new_data);
-    // atlaisvinti seną vietą
+
     uncreate();
-    // reset'int rodykles į naujai išskirtą vietą
+
     first = new_data;
     avail = new_avail;
     limit = first + new_size;
 }
-// tariame, kad `avail` point'ina į išskirtą, bet neinicializuotą vietą
+
 template <class T>
 void Vector<T>::unchecked_append(const T &val)
 {
