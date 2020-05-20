@@ -5,6 +5,7 @@
 - Skaidrės
 - [cppreference.com](https://en.cppreference.com/w/cpp/container/vector)
 - [C++ primer](https://www.amazon.com/Primer-5th-Stanley-B-Lippman/dp/0321714113)
+- [NeonRice](https://github.com/NeonRice)
   
 ## Šio Vector konteinerio struktūra aprašyta pagal [cppreference.com](https://en.cppreference.com/w/cpp/container/vector)
 
