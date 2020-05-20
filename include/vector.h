@@ -19,9 +19,7 @@ public:
     Vector(const Vector &v) { create(v.begin(), v.end()); }
     Vector &operator=(const Vector &);
     ~Vector() { uncreate(); }
-    // void assign(size_type, const T &value);
-    // void assign(typename vector<T>::iterator, typename vector<T>::iterator);
-    // void assign(std::initializer_list<T>);
+    //assign
     std::allocator<T> get_allocator() const { return alloc; }
 
     // ELEMENT ACCESS (at, [], front, back, first )
@@ -61,7 +59,7 @@ public:
     //emplace
     void emplace_back(T args) { push_back(args); }
     iterator erase(const_iterator pos);
-    //iterator erase( const_iterator first, const_iterator last );
+    iterator erase(const_iterator first, const_iterator last);
     void push_back(const T &t);
     void pop_back();
     void resize(size_t count, T value = T());
@@ -101,37 +99,6 @@ Vector<T> &Vector<T>::operator=(const Vector &rhs)
     }
     return *this;
 }
-/*  template <class T>
-    void Vector<T>::assign(Vector<T>::size_type count, const T &value)
-    {
-        if (count > capacity())
-            grow_reallocate(count);
-        for (size_type i = 0; i < count; ++i)
-            buffer[i] = value;
-        vec_sz = count;
-    }
-
-    template <class T>
-    void vector<T>::assign(vector<T>::iterator first, vector<T>::iterator last)
-    {
-        size_type count = last - first;
-        if (count > cap_sz)
-            grow_reallocate(count);
-        for (size_type i = 0; i < count; ++i, ++first)
-            buffer[i] = *first;
-        vec_sz = count;
-    }
-
-    template <class T>
-    void vector<T>::assign(std::initializer_list<T> list)
-    {
-        size_type i, count = list.size();
-        if (count > cap_sz)
-            grow_reallocate(count);
-        i = 0;
-        for (auto &item : list)
-            buffer[i++] = item;
-    } */
 
 //CAPACITY
 template <class T>
@@ -173,7 +140,7 @@ void Vector<T>::shrink_to_fit()
 template <class T>
 void Vector<T>::clear()
 {
-    iterator new_data = alloc.allocate(capacity());
+    iterator new_first = alloc.allocate(capacity());
     size_t cap = capacity();
     uncreate();
     limit = new_data + cap;
@@ -183,27 +150,37 @@ template <class T>
 typename Vector<T>::iterator Vector<T>::erase(const_iterator pos)
 {
     iterator it = &first[pos - first];
-    std::cout << *(pos) << std::endl;
     alloc.destroy(it);
-    std::uninitialized_move(it + 1, avail, it);
-    --avail;
+    std::uninitialized_move(it + 1, avail--, it);    
+
     return it;
 }
 
+template <class T>
+typename Vector<T>::iterator Vector<T>::erase(const_iterator start, const_iterator last)
+{
+    iterator it_start = &first[start - first];
+    iterator it_end = &first[last - first];
+
+    for (auto it = it_start; it != it_end; ++it)
+        alloc.destroy(it);
+
+    std::uninitialized_move(it_end, avail, it_start);
+    return it_end;
+}
+
 template <typename T>
-typename Vector<T>::iterator Vector<T>::insert(Vector<T>::const_iterator pos, const T &val)
-{    
+typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, const T &val)
+{
+    auto new_pos = pos - first;
     if (avail == limit)
         grow();
 
-    std::cout << *(pos) << std::endl;
-    //iterator it = &first[pos - first];
-    //avail++;
-    //std::cout << *(it) << std::endl;
-    //std::uninitialized_move(it, avail - 1 , it + 1 );
-    //*(it) = val;
+    iterator it = &first[new_pos];
+    std::uninitialized_move(it, avail++, it + 1);
+    *(it) = val;
 
-    //return it;
+    return it;
 }
 
 template <class T>

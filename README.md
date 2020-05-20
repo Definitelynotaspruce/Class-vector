@@ -8,27 +8,49 @@
   
 ## Šio Vector konteinerio struktūra aprašyta pagal [cppreference.com](https://en.cppreference.com/w/cpp/container/vector)
 
-## 5 pavyzdinės Vector konteinerio funkcijos:
+## Kelios pavyzdinės Vector konteinerio funkcijos:
 
-### operator[]
+### erase()
+Funkcija, kuriai paduodamas iteratorius *pos* (position).
+*alloc.destroy* sunaikina *pos* elementą, *uninitialized_move* paslenka buvusius elementus per vieną vienetą atgal.
 ```shell
-	T &operator[](size_t i) { return first[i]; }
-    const T &operator[](size_t i) const { return first[i]; }
-```
-### reserve()
-```shell
-template <class T>
-void Vector<T>::reserve(size_t new_cap)
+template <typename T>
+typename Vector<T>::iterator Vector<T>::erase(const_iterator pos)
 {
-    if (new_cap > capacity())
-    {
-        iterator new_data = alloc.allocate(new_cap);
-        iterator new_avail = std::uninitialized_copy(first, avail, new_data);
-        uncreate();
-        first = new_data;
-        avail = new_avail;
-        limit = first + new_cap;
-    }
+    iterator it = &first[pos - first];
+    alloc.destroy(it);
+    std::uninitialized_move(it + 1, avail--, it);
+        
+    return it;
+}
+```
+### insert()
+Funkcija, kuriai paduodamas iteratorius *pos* (position) bei *val* (reikšmė). *uninitialized_move* paslenka elementus per vieną vienetą priekin, *val* priskiriamas savo pozicijai.
+```shell
+template <typename T>
+typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, const T &val)
+{
+    auto new_pos = pos - first;
+    if (avail == limit)
+        grow();
+
+    iterator it = &first[new_pos];
+    std::uninitialized_move(it, avail++, it + 1);
+    *(it) = val;
+
+    return it;
+}
+```
+### create()
+Funkcija, reikalinga Vektoriaus konstravimui iš elementų eilutės. Jai paduodamas [initializer_list](https://en.cppreference.com/w/cpp/utility/initializer_list). *alloc.allocate* išskiria vietos pagal *list.size()*, tuomet elementai po vieną užpildomi su *unchecked_append*.
+```shell
+template <typename T>
+void Vector<T>::create(std::initializer_list<T> list)
+{
+    first = avail = alloc.allocate(list.size());
+    limit = first + list.size();
+    for (auto &val : list)
+        unchecked_append(val);
 }
 ```
 
