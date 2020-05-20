@@ -4,7 +4,7 @@
 ### Naudota literatūra:
 - Skaidrės
 - [cppreference.com](https://en.cppreference.com/w/cpp/container/vector)
-- [C++ primer](https://www.amazon.com/Primer-5th-Stanley-B-Lippman/dp/0321714113)
+- [C++ Primer (5th Edition)](https://www.amazon.com/Primer-5th-Stanley-B-Lippman/dp/0321714113)
 - [NeonRice](https://github.com/NeonRice)
   
 ## Šio Vector konteinerio struktūra aprašyta pagal [cppreference.com](https://en.cppreference.com/w/cpp/container/vector)
@@ -43,7 +43,7 @@ typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, const T &val)
 }
 ```
 ### create()
-Funkcija, reikalinga Vektoriaus konstravimui iš elementų eilutės. Jai paduodamas [initializer_list](https://en.cppreference.com/w/cpp/utility/initializer_list). *alloc.allocate* išskiria vietos pagal *list.size()*, tuomet elementai po vieną užpildomi su *unchecked_append*.
+Funkcija, reikalinga Vektoriaus konstravimui iš elementų eilutės. Jai paduodamas [initializer_list](https://en.cppreference.com/w/cpp/utility/initializer_list). *alloc.allocate* išskiria vietos pagal *list.size()*, tuomet elementai po vieną užpildomi su *alloc.construct*.
 ```shell
 template <typename T>
 void Vector<T>::create(std::initializer_list<T> list)
@@ -51,7 +51,7 @@ void Vector<T>::create(std::initializer_list<T> list)
     first = avail = alloc.allocate(list.size());
     limit = first + list.size();
     for (auto &val : list)
-        unchecked_append(val);
+       alloc.construct(avail++, val);
 }
 ```
 
