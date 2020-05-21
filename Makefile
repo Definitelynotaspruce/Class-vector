@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -pedantic
+CXXFLAGS =  -Wall -std=c++17 -pedantic -O3
 
 NAME = main
 

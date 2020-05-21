@@ -1,26 +1,30 @@
 #include "include/vector.h"
 #include <vector>
 #include <iostream>
-#include "include/john_vector.h"
+#include <chrono>
 
 int main()
 {
-   // rice::vector<int> vstd{1,2,3, 4, 5 ,6,7,8,9};
-    //Vector<int> v{1,2,3, 4, 5 ,6,7,8,9};
-    Vector<int> a (15, 8);
-    std::cout << "size " << a.size() << std::endl;
-    a.resize(15, 1);
-    std::cout << " " << a.size() << std::endl;
-    for (auto &element : a)
-        std::cout << element << " "; 
-   
-    //std::cout << " size " << v.capacity() << std::endl;
-   /*  v.clear();
-    std::cout << v.size();
-    //std::cout << " size " << v.capacity() << std::endl;
+    int sz = 100000000;
+    auto start = std::chrono::system_clock::now();
 
-    for (auto &element : v)
-        std::cout << element << " ";   */
-    
+    std::vector<int> v1;
+    for (int i = 1; i <= sz; ++i)
+        v1.push_back(i);
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "std::vector užtruko " << elapsed_seconds.count() << std::endl;
+
+    start = std::chrono::system_clock::now();
+
+    Vector<int> v2;
+    for (int i = 1; i <= sz; ++i)
+        v2.push_back(i);
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end - start;
+    std::cout << " Vector užtruko " << elapsed_seconds.count() << std::endl;
+
     return 0;
 }
