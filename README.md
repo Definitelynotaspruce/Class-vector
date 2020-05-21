@@ -104,7 +104,7 @@ Analizė buvo atliekama ir su optimizavimo flag'u *-O3* ir be.
 | 1000 000 000 | -O3     | (be optimizacijos) |
 | ------------ | ------- | ------------------ |
 | std::vector  | 15.9032 | 24.0411            |
-| Vector       | 23.6825 | *41.951*           |
+| Vector       | 23.6825 | **41.951**         |
 
 Visi rezultatai:
 | Dydis        | std::vector -O3 | std::vector | Vector -O3 | Vector    |
@@ -114,7 +114,7 @@ Visi rezultatai:
 | 1 000 000    | 0.0136494       | 0.0251377   | 0.014204   | 0.0266352 |
 | 10 000 000   | 0.157973        | 0.259689    | 0.183034   | 0.293446  |
 | 100 000 000  | 1.49883         | 2.53095     | 1.68619    | 2.75768   |
-| 1000 000 000 | 15.9032         | 24.0411     | 23.6825    | *41.951*  |
+| 1000 000 000 | 15.9032         | 24.0411     | 23.6825    | 41.951    |
 
 ### Išvados:
 - *Vector* yra lėtesnis visais atvejais
